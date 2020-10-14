@@ -32,6 +32,8 @@ class Info extends Controller
             ]);
         }
         $id=$this->request->id;
+        var_dump($id);
+        exit();
         $result=Db::table("admin")->field("password")->where("id",$id)->find();
         // var_dump($password);
         $password = $result["password"];

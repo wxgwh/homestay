@@ -6,14 +6,8 @@ use think\Controller;
 use think\Request;
 use think\Db;
 
-class Index extends Controller
+class Favorites extends Controller
 {
-
-    public $code;
-    public function __construct(Request $request = null){
-        parent::__construct($request);
-        $this->code=config('code');
-    }
     /**
      * 显示资源列表
      *
@@ -22,23 +16,6 @@ class Index extends Controller
     public function index()
     {
         //
-        $banner=Db::table('homestay')->field('sid,sname,sthumb')->order('sid')->limit(0,3)->select();
-        $category=Db::table('category')->field('cid,cname,cdesc')->order('cid')->limit(0,4)->select();
-        for($i=0,$count=count($category);$i<$count;$i++){
-            $cid=$category[$i]['cid'];
-            $homestay = Db::table('homestay')->field('sid,sthumb,sname,sdesc,sprice,score,stag,scity,sarea')->where('cid',$cid)->order('sid','sdesc')->limit(0,4)->select();
-            $category[$i]['children']=$homestay;
-        }
-
-        
-        return json([
-            'code'=> $this->code['success'],
-            'msg'=>'数据获取成功',
-            'data'=> [
-                'banner'=>$banner,
-                'category'=>$category
-            ]
-        ]);
     }
 
     /**
@@ -71,6 +48,19 @@ class Index extends Controller
     public function read($id)
     {
         //
+        checkToken();
+        $uid = $this->request->uid;
+        $model = model('User');
+        $list = $model->initfavorites($uid);
+        $list = $list['collection'];
+        // $list = explode(',',$list);  
+        // for($i = 0;$i<count($list);$i++){
+        //     $list[$i]=intval($list[$i]);
+        // }
+        // var_dump($list);
+        $result = Db::table('homestay')->field('sname,sprice,sthumb,stag')->where('sid','in',$list)->select();
+        var_dump($result);
+        exit();
     }
 
     /**

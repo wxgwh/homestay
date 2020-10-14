@@ -4,9 +4,9 @@ namespace app\index\controller;
 
 use think\Controller;
 use think\Request;
-use think\Db;
+// use think\Db;
 
-class Index extends Controller
+class User extends Controller
 {
 
     public $code;
@@ -22,23 +22,6 @@ class Index extends Controller
     public function index()
     {
         //
-        $banner=Db::table('homestay')->field('sid,sname,sthumb')->order('sid')->limit(0,3)->select();
-        $category=Db::table('category')->field('cid,cname,cdesc')->order('cid')->limit(0,4)->select();
-        for($i=0,$count=count($category);$i<$count;$i++){
-            $cid=$category[$i]['cid'];
-            $homestay = Db::table('homestay')->field('sid,sthumb,sname,sdesc,sprice,score,stag,scity,sarea')->where('cid',$cid)->order('sid','sdesc')->limit(0,4)->select();
-            $category[$i]['children']=$homestay;
-        }
-
-        
-        return json([
-            'code'=> $this->code['success'],
-            'msg'=>'数据获取成功',
-            'data'=> [
-                'banner'=>$banner,
-                'category'=>$category
-            ]
-        ]);
     }
 
     /**
@@ -59,7 +42,22 @@ class Index extends Controller
      */
     public function save(Request $request)
     {
-        //
+        //用户注册
+        $data = $this->request->post();
+        //验证规则（待补充）
+
+        $data['password']=sercetPassword($data['password']);
+        $data['nickname']='小主'.time();
+        // $data['create_time']=time();
+        // $data['update_time']=time();
+        $model = model('User');
+        $result=$model->add($data);
+        if($result){
+            return json([
+                'code'=> $this->code['success'],
+                'msg'=>'注册成功'
+            ]);
+        }
     }
 
     /**
@@ -71,6 +69,25 @@ class Index extends Controller
     public function read($id)
     {
         //
+        checkToken();
+        $uid = $this->request->uid;
+        $model = model('User');
+        $result=$model->initUserinfo($uid);
+        // var_dump($result);
+        // exit();
+        if($result){
+            $result['sextext'] = setsextext($result['sex']);
+            return json([
+                'code' => $this->code['success'],
+                'msg' => '数据获取成功',
+                'data' => $result
+            ]);
+        }else{
+            return json([
+                'code' => $this->code['success'],
+                'msg' => '没有数据',
+            ]);
+        }
     }
 
     /**

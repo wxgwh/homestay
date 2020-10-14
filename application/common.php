@@ -44,10 +44,30 @@ function checkToken(){
         json(['code'=>400,'msg'=>'token权限错误'],401)->send();
         exit();
     }
-    request()->id = $tokenResult['id'];
-    request()->username = $tokenResult['username'];
+    $flag=isset($tokenResult['id']);
+    // exit();
+    if($flag){
+        request()->id = $tokenResult['id'];
+    }
+    $flag=isset($tokenResult['uid']);
+    if($flag){
+        request()->uid = $tokenResult['uid'];
+    }
+    $flag=isset($tokenResult['username']);
+    if($flag){
+        request()->uid = $tokenResult['username'];
+    }
 }
 
 function sercetPassword($pass){
     return md5(crypt($pass,config('salt')));
+}
+
+function setsextext($sex){
+    $sextext = '男';
+    $setArr = ['未填写','男','女'];
+    if(isset($setArr[$sex])){
+        $sextext = $setArr[$sex]; 
+    }
+    return $sextext;
 }

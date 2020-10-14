@@ -5,6 +5,7 @@ namespace app\index\controller;
 use think\Controller;
 use think\Request;
 use think\Db;
+use think\JWT;
 
 class Detail extends Controller
 {
@@ -89,6 +90,49 @@ class Detail extends Controller
     public function update(Request $request, $id)
     {
         //
+        //权限验证
+        // parent::_initialize();
+        // // echo 'hello';
+        checkToken();
+        $token = $this->request->put();
+        $uid=$this->request->uid;
+        // $model = model('User');
+        // $result=$model->collection($uid);
+        $collection = Db::table('user')->field('collection')->where('uid',$uid)->find();
+        $collection=explode(',',$collection['collection']);
+        $key=in_array($id,$collection);
+        if($key){
+            $index=array_search($id,$collection);
+            array_splice($collection,$index,1);
+            $model = model('User');
+            $result=$model->updatecollection($uid,$collection);
+            if($result){
+                return json([
+                    'code'=> $this->code['success'],
+                    'msg'=>'取消成功',
+                ]);
+            }else{
+                return json([
+                    'code'=> $this->code['success'],
+                    'msg'=>'取消失败',
+                ]);
+            }
+        }else{
+            array_push($collection,$id);
+            $model = model('User');
+            $result=$model->updatecollection($uid,$collection);
+            if($result){
+                return json([
+                    'code'=> $this->code['success'],
+                    'msg'=>'收藏成功',
+                ]);
+            }else{
+                return json([
+                    'code'=> $this->code['success'],
+                    'msg'=>'收藏失败',
+                ]);
+            }
+        }
     }
 
     /**

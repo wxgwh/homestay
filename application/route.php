@@ -14,6 +14,11 @@ Route::resource('api/Homestay','admin/Homestay');
 //前台
 Route::resource('index/index','index/Index');
 Route::resource('index/detail','index/Detail');
+Route::resource('index/homestaylist','index/Homestaylist');
+Route::resource('index/user','index/User');
+Route::resource('index/login','index/Login');
+Route::resource('index/favorites','index/Favorites');
+
 
 
 return [

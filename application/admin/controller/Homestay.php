@@ -163,6 +163,19 @@ class Homestay extends Controller
     public function update(Request $request, $id)
     {
         //
+        $data= $this->request->put();
+        $result=Db::name('homestay')->where('sid',$data['sid'])->update(['sname'=>$data['sname'],'sdesc'=>$data['sdesc'],'cid'=>$data['cid'],'saddress'=>$data['saddress'],'sarea'=>$data['sarea'],'sbanner'=>$data['sbanner'],'scity'=>$data['scity'],'score'=>$data['score'],'sdetail'=>$data['sdetail'],'snotice'=>$data['snotice'],'sprice'=>$data['sprice'],'sprovince'=>$data['sprovince'],'stag'=>$data['stag'],'status'=>$data['status'],'sthumb'=>$data['sthumb']]);
+        if($result){
+            return json([
+                'code' => 200,
+                'msg' => '数据更新成功',
+            ]);
+        }else{
+            return json([
+                'code' => 400,
+                'msg' => '意料之外的问题'
+            ]);
+        }
     }
 
     /**

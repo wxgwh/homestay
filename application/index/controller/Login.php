@@ -4,11 +4,10 @@ namespace app\index\controller;
 
 use think\Controller;
 use think\Request;
-use think\Db;
+use think\JWT;
 
-class Index extends Controller
+class Login extends Controller
 {
-
     public $code;
     public function __construct(Request $request = null){
         parent::__construct($request);
@@ -22,23 +21,6 @@ class Index extends Controller
     public function index()
     {
         //
-        $banner=Db::table('homestay')->field('sid,sname,sthumb')->order('sid')->limit(0,3)->select();
-        $category=Db::table('category')->field('cid,cname,cdesc')->order('cid')->limit(0,4)->select();
-        for($i=0,$count=count($category);$i<$count;$i++){
-            $cid=$category[$i]['cid'];
-            $homestay = Db::table('homestay')->field('sid,sthumb,sname,sdesc,sprice,score,stag,scity,sarea')->where('cid',$cid)->order('sid','sdesc')->limit(0,4)->select();
-            $category[$i]['children']=$homestay;
-        }
-
-        
-        return json([
-            'code'=> $this->code['success'],
-            'msg'=>'数据获取成功',
-            'data'=> [
-                'banner'=>$banner,
-                'category'=>$category
-            ]
-        ]);
     }
 
     /**
@@ -60,6 +42,31 @@ class Index extends Controller
     public function save(Request $request)
     {
         //
+        $data = $this->request->post();
+        
+        $model = model('User');
+        $result = $model->find($data);
+        if($result){
+            //当前用户收藏的民宿
+            $collection = $result['collection'];
+            $payload = [
+                'uid'=>$result['uid'],
+                'nickname'=>$result['nickname']
+            ];
+            $token=JWT::getToken($payload,config('jwtkey'));
+            return json([
+                'code'=> $this->code['success'],
+                'msg'=>'登录成功',
+                'data'=>$result,
+                'token'=>$token,
+                'collection'=>$collection
+            ]);
+        }else{
+            return json([
+                'code'=> $this->code['fail'],
+                'msg'=>'用户名或验证码有问题',
+            ]);
+        }
     }
 
     /**

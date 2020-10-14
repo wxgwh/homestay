@@ -68,6 +68,7 @@ class Category extends Controller
 
         $category = Db::table('category')->field('cid,cname,cdesc')->where($where)->page($page)->limit($limit)->select();
         $count = Db::table('category')->where($where)->count();
+        // $count = $category->total();
 
         // var_dump($category);
         // var_dump($count);

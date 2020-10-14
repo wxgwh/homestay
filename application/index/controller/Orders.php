@@ -4,15 +4,23 @@ namespace app\index\controller;
 
 use think\Controller;
 use think\Request;
-use think\Db;
 
-class Index extends Controller
+class Orders extends Controller
 {
-
     public $code;
-    public function __construct(Request $request = null){
+    public $model;
+    //未添加验证
+    public $validate;
+    public function __construct(Request $request = null)
+    {
         parent::__construct($request);
-        $this->code=config('code');
+        $this->code = config('code');
+        $this->model = model('Orders');
+        $this->validate = validate();
+    }
+    public function _initialize(){
+        parent::_initialize();
+        checkToken();
     }
     /**
      * 显示资源列表
@@ -22,23 +30,6 @@ class Index extends Controller
     public function index()
     {
         //
-        $banner=Db::table('homestay')->field('sid,sname,sthumb')->order('sid')->limit(0,3)->select();
-        $category=Db::table('category')->field('cid,cname,cdesc')->order('cid')->limit(0,4)->select();
-        for($i=0,$count=count($category);$i<$count;$i++){
-            $cid=$category[$i]['cid'];
-            $homestay = Db::table('homestay')->field('sid,sthumb,sname,sdesc,sprice,score,stag,scity,sarea')->where('cid',$cid)->order('sid','sdesc')->limit(0,4)->select();
-            $category[$i]['children']=$homestay;
-        }
-
-        
-        return json([
-            'code'=> $this->code['success'],
-            'msg'=>'数据获取成功',
-            'data'=> [
-                'banner'=>$banner,
-                'category'=>$category
-            ]
-        ]);
     }
 
     /**
@@ -59,7 +50,22 @@ class Index extends Controller
      */
     public function save(Request $request)
     {
-        //
+        //用户 添加 未支付 订单
+        $data = $this->request->post();
+        // $this->validate->sence()->check();
+        $data['statue']=1;
+        $homestayModel = model('homestay');
+        Db::startTrans();
+        try{
+            $orderResult = $this->model->add($data);
+            $homestayResult = $homestayModel->edit(['status'=>0],$data['sid']);
+            if($orderResult && $homestayResult){
+                Db::commit();
+            }
+        }catch(Exception $exception){
+            Db::rollback();
+        }
+        
     }
 
     /**
